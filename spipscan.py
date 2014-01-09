@@ -15,7 +15,9 @@ def detect_version(header_composed_by):
         print "[-] unable to find the version"
         pass
 
-def detect_plugins(url):
+def detect_plugins(url, bruteforce_file):
+    global opts
+
     plugins_folder_uri = "plugins/"
     url = url + plugins_folder_uri
     print "Accessing " + url
@@ -41,6 +43,9 @@ def detect_plugins(url):
         # folder might exist but not accessible
         # gonna try to detect plugins with brute force attack
         print "[-] folder plugins/ is forbidden"
+        if (bruteforce_file is not None):
+            # bruteforce the plugins folder
+            bruteforce_folder_plugins(url, bruteforce_file)
     elif (req.status_code == 404):
         # folder seems to not exist
         print "[-] folder plugins/ does not exist"
@@ -51,7 +56,7 @@ def detect_plugins(url):
 def remove_new_line_from_name(name):
     return name[:-1] + '/'
 
-def brute_force_folder_plugins(url, name_file):
+def bruteforce_folder_plugins(url, name_file):
     # uri for the plugins folder
     plugins_folder_uri = "plugins/"
     url = url + plugins_folder_uri
@@ -91,7 +96,7 @@ parser.add_option('--website', help='Website to pentest', dest='website')
 parser.add_option('--path', help='Path for webapp (default : "/")', dest='path', default='/')
 parser.add_option('--plugins', help='Detect plugins installed', dest='detect_plugins', default=False, action='store_true')
 parser.add_option('--version', help='Detect version', dest='detect_version', default=False, action='store_true')
-parser.add_option('--brute_force_plugins', help='Bruteforce plugin file (eg. plugins_name.txt)', dest='brute_force_plugins', default=None)
+parser.add_option('--bruteforce_plugins_file', help='Bruteforce plugin file (eg. plugins_name.txt)', dest='bruteforce_plugins_file', default=None)
 # parser.add_option('--v', help='Verbose', dest='verbose', default=False)
 
 if (len(sys.argv) <= 2):
@@ -107,7 +112,8 @@ else:
         detect_version(req.headers['composed-by']) 
 
     if (opts.detect_plugins):
-        detect_plugins(url)
+        detect_plugins(url, opts.bruteforce_plugins_file)
 
-    if (opts.brute_force_plugins is not None):
-        brute_force_folder_plugins(url, opts.brute_force_plugins)
+    # detect plugin will do brute force attack if it finds a HTTP 403 (Restricted)
+    if (opts.detect_plugins is False and opts.bruteforce_plugins_file is not None):
+        bruteforce_folder_plugins(url, opts.bruteforce_plugins_file)
