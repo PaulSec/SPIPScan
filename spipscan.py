@@ -48,6 +48,24 @@ def detect_plugins(url):
         print "While accessing " + url + ", the status code is : " + str(req.status_code)
 
 
+def remove_new_line_from_name(name):
+    return name[:-1] + '/'
+
+def brute_force_folder_plugins(url, name_file):
+    # uri for the plugins folder
+    plugins_folder_uri = "plugins/"
+    url = url + plugins_folder_uri
+
+    folders = []
+    with open(name_file) as f:
+        folders = f.readlines()
+
+    # removing new line 
+    folders = [remove_new_line_from_name(name) for name in folders]
+    for folder in folders:
+        print "[-] Trying : " + url + folder
+        detect_version_by_plugin_name(url, folder)
+
 def detect_version_by_plugin_name(url, folder):
     try:
         url_plugin = url + folder + "plugin.xml"
@@ -73,6 +91,7 @@ parser.add_option('--website', help='Website to pentest', dest='website')
 parser.add_option('--path', help='Path for webapp (default : "/")', dest='path', default='/')
 parser.add_option('--plugins', help='Detect plugins installed', dest='detect_plugins', default=False, action='store_true')
 parser.add_option('--version', help='Detect version', dest='detect_version', default=False, action='store_true')
+parser.add_option('--brute_force_plugins', help='Bruteforce plugin file (eg. plugins_name.txt)', dest='brute_force_plugins', default=None)
 # parser.add_option('--v', help='Verbose', dest='verbose', default=False)
 
 if (len(sys.argv) <= 1):
@@ -89,3 +108,6 @@ else:
 
     if (opts.detect_plugins):
         detect_plugins(url)
+
+    if (opts.brute_force_plugins is not None):
+        brute_force_folder_plugins(url, opts.brute_force_plugins)
