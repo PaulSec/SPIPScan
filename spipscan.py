@@ -29,8 +29,14 @@ def detect_plugins(url):
         links_to_plugins = soup('a')
         for link in links_to_plugins:
             # grabbing the folder of the plugin
-            link = str(link)
-            detect_version_by_plugin_name(url, link)
+            try:
+                regex_plugin = re.search(r"href=\"(\w+/)\"> (\w+)/<", str(link))
+                folder_plugin = regex_plugin.group(1)
+                name_plugin = regex_plugin.group(2)
+                detect_version_by_plugin_name(url, folder_plugin)
+            except:
+                pass
+            
     elif (req.status_code == 403):
         # folder might exist but not accessible
         # gonna try to detect plugins with brute force attack
@@ -42,24 +48,21 @@ def detect_plugins(url):
         print "While accessing " + url + ", the status code is : " + str(req.status_code)
 
 
-def detect_version_by_plugin_name(url, name):
-    regex_plugin = re.search(r"href=\"(\w+/)\"> (\w+)/<", name)
+def detect_version_by_plugin_name(url, folder):
     try:
-        url_plugin = url + regex_plugin.group(1) + "plugin.xml"
-        name_plugin = regex_plugin.group(2)
+        url_plugin = url + folder + "plugin.xml"
         # HTTP GET to get the version of the plugin
         req_plugin_xml = requests.get(url_plugin, timeout=5)
         regex_version_plugin = re.search(r"<version>(\d+(.\d+)?(.\d+)?)</version>", req_plugin_xml.content)
-        print "[!] Plugin " + str(name_plugin) + " detected. Version : " + str(regex_version_plugin.group(1))
+        print "[!] Plugin " + folder + " detected. Version : " + str(regex_version_plugin.group(1))
         print "URL : " + url_plugin
     except:
         try:
             url_plugin = url + regex_plugin.group(1) + "paquet.xml"
-            name_plugin = regex_plugin.group(2)
             # HTTP GET to get the version of the plugin
             req_plugin_xml = requests.get(url_plugin, timeout=5)
             regex_version_plugin = re.search(r"version=\"(\d+(.\d+)?(.\d+)?)\"", req_plugin_xml.content)
-            print "[!] Plugin " + str(name_plugin) + " detected. Version : " + str(regex_version_plugin.group(1))
+            print "[!] Plugin " + folder + " detected. Version : " + str(regex_version_plugin.group(1))
             print "URL : " + url_plugin
         except:
             pass    
