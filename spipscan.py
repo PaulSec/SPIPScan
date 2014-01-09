@@ -23,6 +23,9 @@ def detect_plugins(url, bruteforce_file):
     print "Accessing " + url
     req = requests.get(url, timeout=5)
 
+    print req.status_code
+    raw_input()
+
     if (req.status_code == 200):
         # folder might be viewable
         # gonna iterate on the different plugins
@@ -76,17 +79,23 @@ def detect_version_by_plugin_name(url, folder):
         url_plugin = url + folder + "plugin.xml"
         # HTTP GET to get the version of the plugin
         req_plugin_xml = requests.get(url_plugin, timeout=5)
-        regex_version_plugin = re.search(r"<version>(\d+(.\d+)?(.\d+)?)</version>", req_plugin_xml.content)
-        print "[!] Plugin " + folder[:-1] + " detected. Version : " + str(regex_version_plugin.group(1))
-        print "URL : " + url_plugin
+        if (req_plugin_xml.status_code == 200):
+            regex_version_plugin = re.search(r"<version>(\d+(.\d+)?(.\d+)?)</version>", req_plugin_xml.content)
+            print "[!] Plugin " + folder[:-1] + " detected. Version : " + str(regex_version_plugin.group(1))
+            print "URL : " + url_plugin
+        else:
+            pass
     except:
         try:
             url_plugin = url + folder + "paquet.xml"
             # HTTP GET to get the version of the plugin
             req_plugin_xml = requests.get(url_plugin, timeout=5)
-            regex_version_plugin = re.search(r"version=\"(\d+(.\d+)?(.\d+)?)\"", req_plugin_xml.content)
-            print "[!] Plugin " + folder[:-1] + " detected. Version : " + str(regex_version_plugin.group(1))
-            print "URL : " + url_plugin
+            if (req_plugin_xml.status_code == 200):
+                regex_version_plugin = re.search(r"version=\"(\d+(.\d+)?(.\d+)?)\"", req_plugin_xml.content)
+                print "[!] Plugin " + folder[:-1] + " detected. Version : " + str(regex_version_plugin.group(1))
+                print "URL : " + url_plugin
+            else:
+                pass
         except:
             pass    
 
