@@ -28,4 +28,9 @@ Plugins bruteforce
 python spipscan.py --website=http://website.com --bruteforce_plugins=plugins_name.txt
 
 
+Vulnerabilities identification
+========
+python spipscan.py --website=http://website.com --vulns  
+
+
 
