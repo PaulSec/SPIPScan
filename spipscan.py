@@ -72,15 +72,15 @@ def detect_version_by_plugin_name(url, folder):
         # HTTP GET to get the version of the plugin
         req_plugin_xml = requests.get(url_plugin, timeout=5)
         regex_version_plugin = re.search(r"<version>(\d+(.\d+)?(.\d+)?)</version>", req_plugin_xml.content)
-        print "[!] Plugin " + folder + " detected. Version : " + str(regex_version_plugin.group(1))
+        print "[!] Plugin " + folder[:-1] + " detected. Version : " + str(regex_version_plugin.group(1))
         print "URL : " + url_plugin
     except:
         try:
-            url_plugin = url + regex_plugin.group(1) + "paquet.xml"
+            url_plugin = url + folder + "paquet.xml"
             # HTTP GET to get the version of the plugin
             req_plugin_xml = requests.get(url_plugin, timeout=5)
             regex_version_plugin = re.search(r"version=\"(\d+(.\d+)?(.\d+)?)\"", req_plugin_xml.content)
-            print "[!] Plugin " + folder + " detected. Version : " + str(regex_version_plugin.group(1))
+            print "[!] Plugin " + folder[:-1] + " detected. Version : " + str(regex_version_plugin.group(1))
             print "URL : " + url_plugin
         except:
             pass    
@@ -94,7 +94,7 @@ parser.add_option('--version', help='Detect version', dest='detect_version', def
 parser.add_option('--brute_force_plugins', help='Bruteforce plugin file (eg. plugins_name.txt)', dest='brute_force_plugins', default=None)
 # parser.add_option('--v', help='Verbose', dest='verbose', default=False)
 
-if (len(sys.argv) <= 1):
+if (len(sys.argv) <= 2):
     parser.print_help()
 else:
     (opts, args) = parser.parse_args()
