@@ -23,9 +23,6 @@ def detect_plugins(url, bruteforce_file):
     print "Accessing " + url
     req = requests.get(url, timeout=5)
 
-    print req.status_code
-    raw_input()
-
     if (req.status_code == 200):
         # folder might be viewable
         # gonna iterate on the different plugins
