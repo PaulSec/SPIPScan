@@ -4,12 +4,21 @@ import requests
 import re
 from bs4 import BeautifulSoup
 
+major_version = 0
+intermediary_version = 0
+minor_version = 0
+
 def detect_version(header_composed_by):
+    global major_version
+    global intermediary_version
+    global minor_version
+
     regex_version_spip = re.search(r"SPIP (\d+).(\d+).(\d+)", header_composed_by)
     try:
         major_version = regex_version_spip.group(1)
         intermediary_version = regex_version_spip.group(2)
         minor_version = regex_version_spip.group(3)
+
         print "[!] version is : " + str(major_version) + "." + str(intermediary_version) + "." + str(minor_version)
     except:
         print "[-] unable to find the version"
@@ -53,8 +62,45 @@ def detect_plugins(url, bruteforce_file):
         print "While accessing " + url + ", the status code is : " + str(req.status_code)
 
 
-def remove_new_line_from_name(name):
-    return name[:-1] + '/'
+def remove_new_line_from_name(name, char=''):
+    return name[:-1] + char
+
+def detect_vulnerabilities():
+    global major_version
+    global intermediary_version
+    global minor_version
+
+    vulns = []
+    with open('spip_vulns.db') as f:
+        vulns = f.readlines()
+
+    # removing new line 
+    vulns = [remove_new_line_from_name(vuln) for vuln in vulns]
+
+    # parsing the db to check if there's any vuln
+    for vuln in vulns:
+        vals = vuln.split(';;')
+        versions_vuln = vals[0]
+        description_vuln = vals[1]
+        url_vuln = vals[2]
+        version_vuln = versions_vuln.split('/')
+        for version in version_vuln:
+            tmp = version.split('.')
+            i = 0
+            while i < len(tmp):
+                if (i == 0 and tmp[i] != major_version):
+                    break
+                if (i == 1 and tmp[i] != intermediary_version):
+                    break
+
+                if (i == 1 and tmp[i] == intermediary_version and (i + 1) > len(tmp)):
+                    print "[!] Potential Vulnerability : (versions : " + versions_vuln + "), " + description_vuln + ", details : " + url_vuln
+                    break
+
+                if ((i == 2) and (int(tmp[i]) >= int(minor_version))):
+                    print "[!] Potential Vulnerability : (versions : " + versions_vuln + "), " + description_vuln + ", details : " + url_vuln
+                    break
+                i = i + 1
 
 def bruteforce_folder_plugins(url, name_file):
     # uri for the plugins folder
@@ -66,7 +112,7 @@ def bruteforce_folder_plugins(url, name_file):
         folders = f.readlines()
 
     # removing new line 
-    folders = [remove_new_line_from_name(name) for name in folders]
+    folders = [remove_new_line_from_name(name, '/') for name in folders]
     for folder in folders:
         print "[-] Trying : " + url + folder
         detect_version_by_plugin_name(url, folder)
@@ -102,6 +148,7 @@ parser.add_option('--website', help='Website to pentest', dest='website')
 parser.add_option('--path', help='Path for webapp (default : "/")', dest='path', default='/')
 parser.add_option('--plugins', help='Detect plugins installed', dest='detect_plugins', default=False, action='store_true')
 parser.add_option('--version', help='Detect version', dest='detect_version', default=False, action='store_true')
+parser.add_option('--vulns', help='Detect possible vulns', dest='detect_vulns', default=False, action='store_true')
 parser.add_option('--bruteforce_plugins_file', help='Bruteforce plugin file (eg. plugins_name.txt)', dest='bruteforce_plugins_file', default=None)
 # parser.add_option('--v', help='Verbose', dest='verbose', default=False)
 
@@ -112,7 +159,7 @@ else:
 
     url = opts.website + opts.path
 
-    if (opts.detect_version):
+    if (opts.detect_version or opts.detect_vulns):
         print "Accessing " + url
         req = requests.get(url, timeout=5)
         detect_version(req.headers['composed-by']) 
@@ -123,3 +170,6 @@ else:
     # detect plugin will do brute force attack if it finds a HTTP 403 (Restricted)
     if (opts.detect_plugins is False and opts.bruteforce_plugins_file is not None):
         bruteforce_folder_plugins(url, opts.bruteforce_plugins_file)
+
+    if (opts.detect_vulns):
+        detect_vulnerabilities()
