@@ -8,6 +8,7 @@ major_version = 0
 intermediary_version = 0
 minor_version = 0
 folder_plugins = None
+folder_themes = None
 
 # Detect the version of a SPIP install
 
@@ -29,10 +30,32 @@ def detect_version(header_composed_by):
         print "[-] Unable to find the version"
         pass
 
+# Detect the theme folder of a SPIP install
+
+
+def detect_themes_folder(url):
+    global folder_themes
+
+    folders = ['themes/', 'theme/', 'Themes/', 'Theme/']
+
+    for folder in folders:
+        url_to_visit = url + folder
+        req = requests.get(url_to_visit, timeout=10)
+
+        if (req.status_code == 200 or req.status_code == 403):
+            folder_themes = folder
+            print "[!] Theme folder is : " + folder_themes
+            return True
+        else:
+            pass
+
+    return False
+
+
 # Detect the plugin folder of a SPIP install
 
 
-def detect_plugin_folder(url):
+def detect_plugins_folder(url):
     global folder_plugins
 
     folders = ['plugins/', 'plugins-dist/']
@@ -186,6 +209,8 @@ parser.add_option('--path', help='Path for webapp (default : "/")',
                   dest='path', default='/')
 parser.add_option('--plugins', help='Detect plugins installed',
                   dest='detect_plugins', default=False, action='store_true')
+parser.add_option('--themes', help='Detect themes installed',
+                  dest='detect_themes', default=False, action='store_true')
 parser.add_option('--version', help='Detect version',
                   dest='detect_version', default=False, action='store_true')
 parser.add_option('--vulns', help='Detect possible vulns',
@@ -193,6 +218,7 @@ parser.add_option('--vulns', help='Detect possible vulns',
 parser.add_option(
     '--bruteforce_plugins_file', help='Bruteforce plugin file (eg. plugins_name.txt)',
     dest='bruteforce_plugins_file', default=None)
+
 
 if (len(sys.argv) <= 2):
     parser.print_help()
@@ -206,15 +232,18 @@ else:
         req = requests.get(url, timeout=10)
         detect_version(req.headers['composed-by'])
 
-    if (not detect_plugin_folder(url)):
-        print "[-] We haven't been able to locate the plugin folders"
+    if (opts.detect_plugins or opts.bruteforce_plugins_file is not None):
+        if not detect_plugins_folder(url):
+            print "[-] We haven't been able to locate the plugins folder"
 
-    if (opts.detect_plugins):
-        detect_plugins(url, opts.bruteforce_plugins_file)
+    if (opts.detect_themes):
+        if not detect_themes_folder(url):
+            print "[-] We haven't been able to locate the themes folder"
 
     # detect plugin will do brute force attack if it finds a HTTP 403
     # (Restricted)
-    if (opts.detect_plugins is False and opts.bruteforce_plugins_file is not None):
+    # opts.detect_plugins is False and 
+    if (opts.bruteforce_plugins_file is not None and folder_plugins is not None):
         bruteforce_folder_plugins(url, opts.bruteforce_plugins_file)
 
     if (opts.detect_vulns):
