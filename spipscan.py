@@ -192,6 +192,7 @@ def bruteforce_plugins_folder(url, name_file):
     if (folder_plugins is None):
         return
 
+    url = url + folder_plugins
     folders = []
     with open(name_file) as f:
         folders = f.readlines()
