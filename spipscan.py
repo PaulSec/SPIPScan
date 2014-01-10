@@ -10,12 +10,15 @@ minor_version = 0
 folder_plugins = None
 
 # Detect the version of a SPIP install
+
+
 def detect_version(header_composed_by):
     global major_version
     global intermediary_version
     global minor_version
 
-    regex_version_spip = re.search(r"SPIP (\d+).(\d+).(\d+)", header_composed_by)
+    regex_version_spip = re.search(
+        r"SPIP (\d+).(\d+).(\d+)", header_composed_by)
     try:
         major_version = regex_version_spip.group(1)
         intermediary_version = regex_version_spip.group(2)
@@ -27,6 +30,8 @@ def detect_version(header_composed_by):
         pass
 
 # Detect the plugin folder of a SPIP install
+
+
 def detect_plugin_folder(url):
     global folder_plugins
 
@@ -45,13 +50,17 @@ def detect_plugin_folder(url):
 
     return False
 
-# Detect version of a plugin name (folder is the name of the folder of the plugin)
+# Detect version of a plugin name (folder is the name of the folder of the
+# plugin)
+
+
 def detect_version_by_plugin_name(url, folder):
     url_plugin = url + folder + "plugin.xml"
     # HTTP GET to get the version of the plugin
     req_plugin_xml = requests.get(url_plugin, timeout=10)
     if (req_plugin_xml.status_code == 200):
-        regex_version_plugin = re.search(r"<version>\s*?(\d+(.\d+)?(.\d+)?)\s*?</version>", req_plugin_xml.content, re.S)
+        regex_version_plugin = re.search(
+            r"<version>\s*?(\d+(.\d+)?(.\d+)?)\s*?</version>", req_plugin_xml.content, re.S)
         print "[!] Plugin " + folder[:-1] + " detected. Version : " + str(regex_version_plugin.group(1))
         print "URL : " + url_plugin
     else:
@@ -59,13 +68,16 @@ def detect_version_by_plugin_name(url, folder):
         # HTTP GET to get the version of the plugin
         req_plugin_xml = requests.get(url_plugin, timeout=10)
         if (req_plugin_xml.status_code == 200):
-            regex_version_plugin = re.search(r"version=\"\s*?(\d+(.\d+)?(.\d+)?)\s*?\"", req_plugin_xml.content, re.S)
+            regex_version_plugin = re.search(
+                r"version=\"\s*?(\d+(.\d+)?(.\d+)?)\s*?\"", req_plugin_xml.content, re.S)
             print "[!] Plugin " + folder[:-1] + " detected. Version : " + str(regex_version_plugin.group(1))
             print "URL : " + url_plugin
         else:
             pass
 
 # Detect plugins by bruteforcing them with a file
+
+
 def detect_plugins(url, bruteforce_file):
     global folder_plugins
 
@@ -79,14 +91,15 @@ def detect_plugins(url, bruteforce_file):
 
     # folder might be viewable
     # gonna iterate on the different plugins
-    if (req.status_code == 200):    
+    if (req.status_code == 200):
         print "[!] folder " + folder_plugins + " is accessible"
         soup = BeautifulSoup(req.content)
         links_to_plugins = soup('a')
         for link in links_to_plugins:
             # grabbing the folder of the plugin
             try:
-                regex_plugin = re.search(r"href=\"(\w+/)\">\s?(\w+)/<", str(link))
+                regex_plugin = re.search(
+                    r"href=\"(\w+/)\">\s?(\w+)/<", str(link))
                 folder_plugin = regex_plugin.group(1)
                 name_plugin = regex_plugin.group(2)
                 detect_version_by_plugin_name(url, folder_plugin)
@@ -102,10 +115,14 @@ def detect_plugins(url, bruteforce_file):
             bruteforce_folder_plugins(url, bruteforce_file)
 
 # Remove new line character and replace it with another one if specified
+
+
 def remove_new_line_from_name(name, char=''):
     return name[:-1] + char
 
 # Detect vulnerabilities of the SPIP website
+
+
 def detect_vulnerabilities():
     global major_version
     global intermediary_version
@@ -115,7 +132,7 @@ def detect_vulnerabilities():
     with open('spip_vulns.db') as f:
         vulns = f.readlines()
 
-    # removing new line 
+    # removing new line
     vulns = [remove_new_line_from_name(vuln) for vuln in vulns]
 
     # parsing the db to check if there's any vuln
@@ -143,6 +160,7 @@ def detect_vulnerabilities():
                     break
                 i = i + 1
 
+
 def bruteforce_folder_plugins(url, name_file):
     # uri for the plugins folder
     global folder_plugins
@@ -150,27 +168,31 @@ def bruteforce_folder_plugins(url, name_file):
     # If we haven't been able to detect the plugins folder, we exit
     if (folder_plugins is None):
         return
-    
+
     folders = []
     with open(name_file) as f:
         folders = f.readlines()
 
-    # removing new line 
+    # removing new line
     folders = [remove_new_line_from_name(name, '/') for name in folders]
     for folder in folders:
         print "[-] Trying : " + url + folder
         detect_version_by_plugin_name(url, folder)
 
-
 # option parser
 parser = optparse.OptionParser()
 parser.add_option('--website', help='Website to pentest', dest='website')
-parser.add_option('--path', help='Path for webapp (default : "/")', dest='path', default='/')
-parser.add_option('--plugins', help='Detect plugins installed', dest='detect_plugins', default=False, action='store_true')
-parser.add_option('--version', help='Detect version', dest='detect_version', default=False, action='store_true')
-parser.add_option('--vulns', help='Detect possible vulns', dest='detect_vulns', default=False, action='store_true')
-parser.add_option('--bruteforce_plugins_file', help='Bruteforce plugin file (eg. plugins_name.txt)', dest='bruteforce_plugins_file', default=None)
-# parser.add_option('--v', help='Verbose', dest='verbose', default=False)
+parser.add_option('--path', help='Path for webapp (default : "/")',
+                  dest='path', default='/')
+parser.add_option('--plugins', help='Detect plugins installed',
+                  dest='detect_plugins', default=False, action='store_true')
+parser.add_option('--version', help='Detect version',
+                  dest='detect_version', default=False, action='store_true')
+parser.add_option('--vulns', help='Detect possible vulns',
+                  dest='detect_vulns', default=False, action='store_true')
+parser.add_option(
+    '--bruteforce_plugins_file', help='Bruteforce plugin file (eg. plugins_name.txt)',
+    dest='bruteforce_plugins_file', default=None)
 
 if (len(sys.argv) <= 2):
     parser.print_help()
@@ -182,7 +204,7 @@ else:
     if (opts.detect_version or opts.detect_vulns):
         print "Accessing " + url
         req = requests.get(url, timeout=10)
-        detect_version(req.headers['composed-by']) 
+        detect_version(req.headers['composed-by'])
 
     if (not detect_plugin_folder(url)):
         print "[-] We haven't been able to locate the plugin folders"
@@ -190,7 +212,8 @@ else:
     if (opts.detect_plugins):
         detect_plugins(url, opts.bruteforce_plugins_file)
 
-    # detect plugin will do brute force attack if it finds a HTTP 403 (Restricted)
+    # detect plugin will do brute force attack if it finds a HTTP 403
+    # (Restricted)
     if (opts.detect_plugins is False and opts.bruteforce_plugins_file is not None):
         bruteforce_folder_plugins(url, opts.bruteforce_plugins_file)
 
