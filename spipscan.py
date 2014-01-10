@@ -34,7 +34,7 @@ def detect_plugin_folder(url):
 
     for folder in folders:
         url_to_visit = url + folder
-        req = requests.get(url_to_visit, timeout=5)
+        req = requests.get(url_to_visit, timeout=10)
 
         if (req.status_code == 200 or req.status_code == 403):
             folder_plugins = folder
@@ -49,21 +49,23 @@ def detect_plugin_folder(url):
 def detect_version_by_plugin_name(url, folder):
     url_plugin = url + folder + "plugin.xml"
     # HTTP GET to get the version of the plugin
-    req_plugin_xml = requests.get(url_plugin, timeout=5)
+    req_plugin_xml = requests.get(url_plugin, timeout=10)
+    print url_plugin
     if (req_plugin_xml.status_code == 200):
-        regex_version_plugin = re.search(r"<version>(\d+(.\d+)?(.\d+)?)</version>", req_plugin_xml.content)
+        regex_version_plugin = re.search(r"<version>\s*?(\d+(.\d+)?(.\d+)?)\s*?</version>", req_plugin_xml.content, re.S)
         print "[!] Plugin " + folder[:-1] + " detected. Version : " + str(regex_version_plugin.group(1))
         print "URL : " + url_plugin
     else:
         url_plugin = url + folder + "paquet.xml"
         # HTTP GET to get the version of the plugin
-        req_plugin_xml = requests.get(url_plugin, timeout=5)
+        req_plugin_xml = requests.get(url_plugin, timeout=10)
         if (req_plugin_xml.status_code == 200):
-            regex_version_plugin = re.search(r"version=\"(\d+(.\d+)?(.\d+)?)\"", req_plugin_xml.content)
+            regex_version_plugin = re.search(r"version=\"\s*?(\d+(.\d+)?(.\d+)?)\s*?\"", req_plugin_xml.content, re.S)
             print "[!] Plugin " + folder[:-1] + " detected. Version : " + str(regex_version_plugin.group(1))
             print "URL : " + url_plugin
         else:
             pass
+
 # Detect plugins by bruteforcing them with a file
 def detect_plugins(url, bruteforce_file):
     global folder_plugins
@@ -74,7 +76,7 @@ def detect_plugins(url, bruteforce_file):
 
     url = url + folder_plugins
     print "Accessing " + url
-    req = requests.get(url, timeout=5)
+    req = requests.get(url, timeout=10)
 
     # folder might be viewable
     # gonna iterate on the different plugins
@@ -150,7 +152,6 @@ def bruteforce_folder_plugins(url, name_file):
     if (folder_plugins is None):
         return
     
-    url = url + folder_plugins
     folders = []
     with open(name_file) as f:
         folders = f.readlines()
@@ -181,7 +182,7 @@ else:
 
     if (opts.detect_version or opts.detect_vulns):
         print "Accessing " + url
-        req = requests.get(url, timeout=5)
+        req = requests.get(url, timeout=10)
         detect_version(req.headers['composed-by']) 
 
     if (not detect_plugin_folder(url)):
