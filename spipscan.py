@@ -135,7 +135,7 @@ def detect_plugins(url, bruteforce_file):
         print "[-] folder " + folder_plugins + " is forbidden"
         if (bruteforce_file is not None):
             # bruteforce the plugins folder
-            bruteforce_folder_plugins(url, bruteforce_file)
+            bruteforce_plugins_folder(url, bruteforce_file)
 
 # Remove new line character and replace it with another one if specified
 
@@ -184,7 +184,7 @@ def detect_vulnerabilities():
                 i = i + 1
 
 
-def bruteforce_folder_plugins(url, name_file):
+def bruteforce_plugins_folder(url, name_file):
     # uri for the plugins folder
     global folder_plugins
 
@@ -244,7 +244,7 @@ else:
     # (Restricted)
     # opts.detect_plugins is False and 
     if (opts.bruteforce_plugins_file is not None and folder_plugins is not None):
-        bruteforce_folder_plugins(url, opts.bruteforce_plugins_file)
+        bruteforce_plugins_folder(url, opts.bruteforce_plugins_file)
 
     if (opts.detect_vulns):
         detect_vulnerabilities()
