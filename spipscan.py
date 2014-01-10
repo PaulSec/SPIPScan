@@ -50,7 +50,6 @@ def detect_version_by_plugin_name(url, folder):
     url_plugin = url + folder + "plugin.xml"
     # HTTP GET to get the version of the plugin
     req_plugin_xml = requests.get(url_plugin, timeout=10)
-    print url_plugin
     if (req_plugin_xml.status_code == 200):
         regex_version_plugin = re.search(r"<version>\s*?(\d+(.\d+)?(.\d+)?)\s*?</version>", req_plugin_xml.content, re.S)
         print "[!] Plugin " + folder[:-1] + " detected. Version : " + str(regex_version_plugin.group(1))
