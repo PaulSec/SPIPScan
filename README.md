@@ -28,7 +28,7 @@ Options:<br />
 Version detection
 ========
 $ python spipscan.py --website=http://127.0.0.1 --version<br />
-Accessing http://127.0.0.1/<br />
+Application is located here : http://127.0.0.1/<br />
 [!] Version is : 3.0.13<br />
 [!] Plugin folder is : plugins-dist/<br />
 
@@ -78,8 +78,13 @@ $ python spipscan.py --website=http://website.com --bruteforce_plugins=plugins_n
 Vulnerabilities identification
 ========
 $ python spipscan.py --website=http://127.0.0.1 --vulns<br />
-Accessing http://127.0.0.1/<br />
+Application is located here : http://127.0.0.1/<br />
 [!] Version is : 2.1.12<br />
 [!] Plugin folder is : plugins/<br />
 [!] Potential Vulnerability : (versions : 2.0.21/2.1.16/3.0.3), SPIP connect Parameter PHP Injection, details : http://www.exploit-db.com/exploits/27941/
 
+Themes detection
+========
+$ python spipscan.py --website=http://127.0.0.1 --themes<br />
+Application is located here : http://127.0.0.1/<br />
+[-] We haven't been able to locate the themes folder
