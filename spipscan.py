@@ -45,6 +45,26 @@ def detect_plugin_folder(url):
 
     return False
 
+# Detect version of a plugin name (folder is the name of the folder of the plugin)
+def detect_version_by_plugin_name(url, folder):
+    url_plugin = url + folder + "plugin.xml"
+    # HTTP GET to get the version of the plugin
+    req_plugin_xml = requests.get(url_plugin, timeout=5)
+    if (req_plugin_xml.status_code == 200):
+        regex_version_plugin = re.search(r"<version>(\d+(.\d+)?(.\d+)?)</version>", req_plugin_xml.content)
+        print "[!] Plugin " + folder[:-1] + " detected. Version : " + str(regex_version_plugin.group(1))
+        print "URL : " + url_plugin
+    else:
+        url_plugin = url + folder + "paquet.xml"
+        # HTTP GET to get the version of the plugin
+        req_plugin_xml = requests.get(url_plugin, timeout=5)
+        if (req_plugin_xml.status_code == 200):
+            regex_version_plugin = re.search(r"version=\"(\d+(.\d+)?(.\d+)?)\"", req_plugin_xml.content)
+            print "[!] Plugin " + folder[:-1] + " detected. Version : " + str(regex_version_plugin.group(1))
+            print "URL : " + url_plugin
+        else:
+            pass
+# Detect plugins by bruteforcing them with a file
 def detect_plugins(url, bruteforce_file):
     global folder_plugins
 
@@ -80,10 +100,11 @@ def detect_plugins(url, bruteforce_file):
             # bruteforce the plugins folder
             bruteforce_folder_plugins(url, bruteforce_file)
 
-
+# Remove new line character and replace it with another one if specified
 def remove_new_line_from_name(name, char=''):
     return name[:-1] + char
 
+# Detect vulnerabilities of the SPIP website
 def detect_vulnerabilities():
     global major_version
     global intermediary_version
@@ -140,24 +161,6 @@ def bruteforce_folder_plugins(url, name_file):
         print "[-] Trying : " + url + folder
         detect_version_by_plugin_name(url, folder)
 
-def detect_version_by_plugin_name(url, folder):
-    url_plugin = url + folder + "plugin.xml"
-    # HTTP GET to get the version of the plugin
-    req_plugin_xml = requests.get(url_plugin, timeout=5)
-    if (req_plugin_xml.status_code == 200):
-        regex_version_plugin = re.search(r"<version>(\d+(.\d+)?(.\d+)?)</version>", req_plugin_xml.content)
-        print "[!] Plugin " + folder[:-1] + " detected. Version : " + str(regex_version_plugin.group(1))
-        print "URL : " + url_plugin
-    else:
-        url_plugin = url + folder + "paquet.xml"
-        # HTTP GET to get the version of the plugin
-        req_plugin_xml = requests.get(url_plugin, timeout=5)
-        if (req_plugin_xml.status_code == 200):
-            regex_version_plugin = re.search(r"version=\"(\d+(.\d+)?(.\d+)?)\"", req_plugin_xml.content)
-            print "[!] Plugin " + folder[:-1] + " detected. Version : " + str(regex_version_plugin.group(1))
-            print "URL : " + url_plugin
-        else:
-            pass
 
 # option parser
 parser = optparse.OptionParser()
