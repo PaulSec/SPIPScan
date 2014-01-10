@@ -226,9 +226,9 @@ else:
     (opts, args) = parser.parse_args()
 
     url = opts.website + opts.path
+    print "Application is located here : " + url
 
     if (opts.detect_version or opts.detect_vulns):
-        print "Accessing " + url
         req = requests.get(url, timeout=10)
         detect_version(req.headers['composed-by'])
 
