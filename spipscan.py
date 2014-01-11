@@ -72,19 +72,8 @@ def detect_folder(url, isForPlugins):
 
         # code only for 200 (directory listing)
         if (req.status_code == 200):
-            print "[!] Directory listing on folder !"
             url = url + folder # set up the url
-            soup = BeautifulSoup(req.content)
-            links_to_plugins = soup('a')
-            for link in links_to_plugins:
-                # grabbing the folder of the plugin
-                try:
-                    regex_plugin = re.search(r"href=\"(\w+/)\">\s?(\w+)/<", str(link))
-                    folder_plugin = regex_plugin.group(1)
-                    name_plugin = regex_plugin.group(2)
-                    detect_version_of_plugin_or_theme_by_folder_name(url, folder_plugin)
-                except:
-                    pass
+            iterate_directory_listing(url, req.content)
             return True
 
         if (req.status_code == 403):
@@ -92,6 +81,23 @@ def detect_folder(url, isForPlugins):
             return True
 
     return False
+
+# Function to iterate on results if there's a directory listing
+# will then (try to) detect the version of the plugin/theme
+
+def iterate_directory_listing(url, content):
+    print "[!] Directory listing on folder !"
+    soup = BeautifulSoup(content)
+    links_to_plugins = soup('a')
+    for link in links_to_plugins:
+        # grabbing the folder of the plugin
+        try:
+            regex_plugin = re.search(r"href=\"(\w+/)\">\s?(\w+)/<", str(link))
+            folder_plugin = regex_plugin.group(1)
+            name_plugin = regex_plugin.group(2)
+            detect_version_of_plugin_or_theme_by_folder_name(url, folder_plugin)
+        except:
+            pass
 
 # Detect the version of either a plugin and theme.
 # Structure is the same, folder contains either plugin.xml or paquet.xml
