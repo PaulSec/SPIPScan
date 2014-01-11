@@ -24,9 +24,9 @@ Options:<br />
                         Bruteforce plugin file (eg. plugins_name.db)<br />
   --bruteforce_themes_file=BRUTEFORCE_THEMES_FILE<br />
                         Bruteforce theme file (eg. themes_name.db)<br />
+  --verbose             Verbose mode<br />
+
                         
-
-
 
 Version detection
 ========
