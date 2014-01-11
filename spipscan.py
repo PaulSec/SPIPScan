@@ -77,7 +77,7 @@ def detect_folder(url, isForPlugins):
             return True
 
         if (req.status_code == 403):
-            display_message("[-] Access forbidden on folder.")
+            print "[-] Access forbidden on folder."
             return True
 
     return False
@@ -242,11 +242,11 @@ else:
 
     if (opts.detect_plugins or opts.bruteforce_plugins_file is not None):
         if not detect_folder(url, True):
-            display_message("[-] We haven't been able to locate the plugins folder")
+            print "[-] We haven't been able to locate the plugins folder"
 
     if (opts.detect_themes or opts.bruteforce_themes_file is not None):
         if not detect_folder(url, False):
-            display_message("[-] We haven't been able to locate the themes folder")
+            print "[-] We haven't been able to locate the themes folder"
 
     # detect plugin will do brute force attack if it finds a HTTP 403
     # (Restricted)
