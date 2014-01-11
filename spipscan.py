@@ -11,6 +11,7 @@ folder_plugins = None
 folder_themes = None
 
 # Detect the version of a SPIP install
+# Version is in the header (for almost all versions)
 
 
 def detect_version(header_composed_by):
@@ -30,112 +31,94 @@ def detect_version(header_composed_by):
         print "[-] Unable to find the version"
         pass
 
-# Detect the theme folder of a SPIP install
+
+# Detect the plugins/themes folder of a SPIP install
+# Moreover, if there's directory listing enabled, it recovers the plugins/themes
+# And it does not do bruteforce attack on the retrieved elements.
 
 
-def detect_themes_folder(url):
+def detect_folder(url, isForPlugins):
     global folder_themes
-
-    folders = ['themes/', 'theme/', 'Themes/', 'Theme/']
-
-    for folder in folders:
-        url_to_visit = url + folder
-        req = requests.get(url_to_visit, timeout=10)
-
-        if (req.status_code == 200 or req.status_code == 403):
-            folder_themes = folder
-            print "[!] Theme folder is : " + folder_themes
-            return True
-        else:
-            pass
-
-    return False
-
-
-# Detect the plugin folder of a SPIP install
-
-
-def detect_plugins_folder(url):
     global folder_plugins
+    global opts
 
-    folders = ['plugins/', 'plugins-dist/']
+    plugins_folders = ['plugins/', 'plugins-dist/']
+    themes_folders = ['themes/', 'theme/', 'Themes/', 'Theme/']
+
+    folders = []
+
+    if (isForPlugins):
+        folders = plugins_folders
+    else:
+        folders = themes_folders
+
 
     for folder in folders:
         url_to_visit = url + folder
         req = requests.get(url_to_visit, timeout=10)
 
+        # code for both status code 200/403
         if (req.status_code == 200 or req.status_code == 403):
-            folder_plugins = folder
-            print "[!] Plugin folder is : " + folder_plugins
+            if (isForPlugins):
+                folder_plugins = folder
+                print "[!] Plugin folder is : " + folder_plugins
+                if (req.status_code == 200):
+                    opts.bruteforce_plugins_file = None
+            else:
+                folder_themes = folder
+                print "[!] Theme folder is : " + folder_themes
+                if (req.status_code == 200):
+                    opts.bruteforce_themes_file = None
+
+        # code only for 200 (directory listing)
+        if (req.status_code == 200):
+            print "[!] Directory listing on folder !"
+            url = url + folder # set up the url
+            soup = BeautifulSoup(req.content)
+            links_to_plugins = soup('a')
+            for link in links_to_plugins:
+                # grabbing the folder of the plugin
+                try:
+                    regex_plugin = re.search(r"href=\"(\w+/)\">\s?(\w+)/<", str(link))
+                    folder_plugin = regex_plugin.group(1)
+                    name_plugin = regex_plugin.group(2)
+                    detect_version_of_plugin_or_theme_by_folder_name(url, folder_plugin)
+                except:
+                    pass
             return True
-        else:
-            pass
+
+        if (req.status_code == 403):
+            print "[-] Access forbidden on folder."
+            return True
 
     return False
 
-# Detect version of a plugin name (folder is the name of the folder of the
-# plugin)
+# Detect the version of either a plugin and theme.
+# Structure is the same, folder contains either plugin.xml or paquet.xml
 
 
-def detect_version_by_plugin_name(url, folder):
-    url_plugin = url + folder + "plugin.xml"
+def detect_version_of_plugin_or_theme_by_folder_name(url, folder):
+    url_folder = url + folder + "plugin.xml"
     # HTTP GET to get the version of the plugin
-    req_plugin_xml = requests.get(url_plugin, timeout=10)
+    req_plugin_xml = requests.get(url_folder, timeout=10)
+    print "[-] Trying : " + url_folder
     if (req_plugin_xml.status_code == 200):
         regex_version_plugin = re.search(
             r"<version>\s*?(\d+(.\d+)?(.\d+)?)\s*?</version>", req_plugin_xml.content, re.S)
         print "[!] Plugin " + folder[:-1] + " detected. Version : " + str(regex_version_plugin.group(1))
-        print "URL : " + url_plugin
+        print "URL : " + url_folder
     else:
-        url_plugin = url + folder + "paquet.xml"
+        url_folder = url + folder + "paquet.xml"
         # HTTP GET to get the version of the plugin
-        req_plugin_xml = requests.get(url_plugin, timeout=10)
+        req_plugin_xml = requests.get(url_folder, timeout=10)
+        print "[-] Trying : " + url_folder
         if (req_plugin_xml.status_code == 200):
             regex_version_plugin = re.search(
                 r"version=\"\s*?(\d+(.\d+)?(.\d+)?)\s*?\"", req_plugin_xml.content, re.S)
             print "[!] Plugin " + folder[:-1] + " detected. Version : " + str(regex_version_plugin.group(1))
-            print "URL : " + url_plugin
+            print "URL : " + url_folder
         else:
             pass
-
-# Detect plugins by bruteforcing them with a file
-
-
-def detect_plugins(url, bruteforce_file):
-    global folder_plugins
-
-    # If we haven't been able to detect the plugins folder, we exit
-    if (folder_plugins is None):
-        return
-
-    url = url + folder_plugins
-    print "Accessing " + url
-    req = requests.get(url, timeout=10)
-
-    # folder might be viewable
-    # gonna iterate on the different plugins
-    if (req.status_code == 200):
-        print "[!] folder " + folder_plugins + " is accessible"
-        soup = BeautifulSoup(req.content)
-        links_to_plugins = soup('a')
-        for link in links_to_plugins:
-            # grabbing the folder of the plugin
-            try:
-                regex_plugin = re.search(
-                    r"href=\"(\w+/)\">\s?(\w+)/<", str(link))
-                folder_plugin = regex_plugin.group(1)
-                name_plugin = regex_plugin.group(2)
-                detect_version_by_plugin_name(url, folder_plugin)
-            except:
-                pass
-
-    # folder might exist but not accessible
-    # gonna try to detect plugins with brute force attack
-    elif (req.status_code == 403):
-        print "[-] folder " + folder_plugins + " is forbidden"
-        if (bruteforce_file is not None):
-            # bruteforce the plugins folder
-            bruteforce_plugins_folder(url, bruteforce_file)
 
 # Remove new line character and replace it with another one if specified
 
@@ -180,46 +163,51 @@ def detect_vulnerabilities():
 
                 if ((i == 2) and (int(tmp[i]) >= int(minor_version))):
                     print "[!] Potential Vulnerability : (versions : " + versions_vuln + "), " + description_vuln + ", details : " + url_vuln
-                    break
-                i = i + 1
+                i =               i = i+ 1
+
+# This function allows you to do brute force to search for folders
+# This function is used to bruteforce Plugin/Theme names 
 
 
-def bruteforce_plugins_folder(url, name_file):
+def bruteforce_folder(url, filename, isForPlugins):
     # uri for the plugins folder
     global folder_plugins
+    global folder_themes
 
     # If we haven't been able to detect the plugins folder, we exit
-    if (folder_plugins is None):
+    if (isForPlugins and folder_plugins is None):
         return
 
-    url = url + folder_plugins
+    # If we haven't been able to detect the themes folder, we exit
+    if (isForPlugins is False and folder_themes is None):
+        return
+
+    if (isForPlugins is False and folder_themes is not None):
+        url = url + folder_themes
+
+    if (isForPlugins and folder_plugins is not None):
+        url = url + folder_plugins
+
+
     folders = []
-    with open(name_file) as f:
+    with open(filename) as f:
         folders = f.readlines()
 
     # removing new line
     folders = [remove_new_line_from_name(name, '/') for name in folders]
     for folder in folders:
-        print "[-] Trying : " + url + folder
-        detect_version_by_plugin_name(url, folder)
+        detect_version_of_plugin_or_theme_by_folder_name(url, folder)    
 
 # option parser
 parser = optparse.OptionParser()
 parser.add_option('--website', help='Website to pentest', dest='website')
-parser.add_option('--path', help='Path for webapp (default : "/")',
-                  dest='path', default='/')
-parser.add_option('--plugins', help='Detect plugins installed',
-                  dest='detect_plugins', default=False, action='store_true')
-parser.add_option('--themes', help='Detect themes installed',
-                  dest='detect_themes', default=False, action='store_true')
-parser.add_option('--version', help='Detect version',
-                  dest='detect_version', default=False, action='store_true')
-parser.add_option('--vulns', help='Detect possible vulns',
-                  dest='detect_vulns', default=False, action='store_true')
-parser.add_option(
-    '--bruteforce_plugins_file', help='Bruteforce plugin file (eg. plugins_name.txt)',
-    dest='bruteforce_plugins_file', default=None)
-
+parser.add_option('--path', help='Path for webapp (default : "/")', dest='path', default='/')
+parser.add_option('--plugins', help='Detect plugins installed', dest='detect_plugins', default=False, action='store_true')
+parser.add_option('--themes', help='Detect themes installed', dest='detect_themes', default=False, action='store_true')
+parser.add_option('--version', help='Detect version', dest='detect_version', default=False, action='store_true')
+parser.add_option('--vulns', help='Detect possible vulns', dest='detect_vulns', default=False, action='store_true')
+parser.add_option('--bruteforce_plugins_file', help='Bruteforce plugin file (eg. plugins_name.db)', dest='bruteforce_plugins_file', default=None)
+parser.add_option('--bruteforce_themes_file', help='Bruteforce theme file (eg. themes_name.db)', dest='bruteforce_themes_file', default=None)
 
 if (len(sys.argv) <= 2):
     parser.print_help()
@@ -234,18 +222,22 @@ else:
         detect_version(req.headers['composed-by'])
 
     if (opts.detect_plugins or opts.bruteforce_plugins_file is not None):
-        if not detect_plugins_folder(url):
+        if not detect_folder(url, True):
             print "[-] We haven't been able to locate the plugins folder"
 
-    if (opts.detect_themes):
-        if not detect_themes_folder(url):
+    if (opts.detect_themes or opts.bruteforce_themes_file is not None):
+        if not detect_folder(url, False):
             print "[-] We haven't been able to locate the themes folder"
 
     # detect plugin will do brute force attack if it finds a HTTP 403
     # (Restricted)
     # opts.detect_plugins is False and 
     if (opts.bruteforce_plugins_file is not None and folder_plugins is not None):
-        bruteforce_plugins_folder(url, opts.bruteforce_plugins_file)
+        bruteforce_folder(url, opts.bruteforce_plugins_file, True)
+
+    # brute force themes folder if 403 also
+    if (opts.bruteforce_themes_file is not None and folder_themes is not None):
+        bruteforce_folder(url, opts.bruteforce_themes_file, False)
 
     if (opts.detect_vulns):
         detect_vulnerabilities()
