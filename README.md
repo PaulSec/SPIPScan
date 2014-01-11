@@ -22,6 +22,9 @@ Options:<br />
   --vulns               Detect possible vulns<br />
   --bruteforce_plugins_file=BRUTEFORCE_PLUGINS_FILE<br />
                         Bruteforce plugin file (eg. plugins_name.txt)<br />
+  --bruteforce_themes_file=BRUTEFORCE_THEMES_FILE<br />
+                        Bruteforce theme file (eg. themes_name.db)<br />
+                        
 
 
 
@@ -72,8 +75,59 @@ $ python spipscan.py --website=http://website.com --plugins --bruteforce_plugins
 
 Plugins bruteforce
 ========
-$ python spipscan.py --website=http://website.com --bruteforce_plugins=plugins_name.db<br />
+$ python spipscan.py --website=http://127.0.0.1 --bruteforce_plugins=plugins_name.db<br />
+Application is located here : http://127.0.0.1/<br />
+[!] Plugin folder is : plugins/<br />
+[-] Access forbidden on folder.<br />
+[-] Trying : http://127.0.0.1/plugins/cfg/plugin.xml<br />
+[-] Trying : http://127.0.0.1/plugins/cfg/paquet.xml<br />
+[-] Trying : http://127.0.0.1/plugins/spip-bonux-3/plugin.xml<br />
+[-] Trying : http://127.0.0.1/plugins/spip-bonux-3/paquet.xml<br />
+[-] Trying : http://127.0.0.1/plugins/couteau_suisse/plugin.xml<br />
+[-] Trying : http://127.0.0.1/plugins/couteau_suisse/paquet.xml<br />
+[-] Trying : http://127.0.0.1/plugins/couteau_suisse_191/plugin.xml<br />
+[-] Trying : http://127.0.0.1/plugins/couteau_suisse_191/paquet.xml<br />
+[-] Trying : http://127.0.0.1/plugins/saisies/plugin.xml<br />
+[-] Trying : http://127.0.0.1/plugins/saisies/paquet.xml<br />
 
+
+
+Themes detection
+========
+$ python spipscan.py --website=http://127.0.0.1 --themes<br />
+Application is located here : http://127.0.0.1/<br />
+[-] We haven't been able to locate the themes folder
+
+
+Themes bruteforce
+========
+$ python spipscan.py --website=http://127.0.0.1/ --bruteforce_themes=themes_name.db<br />
+Application is located here : http://127.0.0.1/<br />
+[!] Theme folder is : themes/<br />
+[-] Access forbidden on folder.<br />
+[-] Trying : http://127.0.0.1/themes/scolaspip_3_0/plugin.xml<br />
+[-] Trying : http://127.0.0.1/themes/scolaspip_3_0/paquet.xml<br />
+[-] Trying : http://127.0.0.1/themes/theme_einsteiniumist/plugin.xml<br />
+[-] Trying : http://127.0.0.1/themes/theme_einsteiniumist/paquet.xml<br />
+[-] Trying : http://127.0.0.1/themes/theme_brownie/plugin.xml<br />
+[-] Trying : http://127.0.0.1/themes/theme_brownie/paquet.xml<br />
+[-] Trying : http://127.0.0.1/themes/theme_brownie_v1/plugin.xml<br />
+[-] Trying : http://127.0.0.1/themes/theme_brownie_v1/paquet.xml<br />
+[-] Trying : http://127.0.0.1/themes/theme_darmstadtiumoid/plugin.xml<br />
+[-] Trying : http://127.0.0.1/themes/theme_darmstadtiumoid/paquet.xml<br />
+[-] Trying : http://127.0.0.1/themes/squelette_darmstadtiumoid/plugin.xml<br />
+[-] Trying : http://127.0.0.1/themes/squelette_darmstadtiumoid/paquet.xml<br />
+[-] Trying : http://127.0.0.1/themes/theme_brominerary/plugin.xml<br />
+[-] Trying : http://127.0.0.1/themes/theme_brominerary/paquet.xml<br />
+[-] Trying : http://127.0.0.1/themes/theme_tincredible/plugin.xml<br />
+[-] Trying : http://127.0.0.1/themes/theme_tincredible/paquet.xml<br />
+[-] Trying : http://127.0.0.1/themes/theme_maparaan/plugin.xml<br />
+[-] Trying : http://127.0.0.1/themes/theme_maparaan/paquet.xml<br />
+[-] Trying : http://127.0.0.1/themes/theme_initializr/plugin.xml<br />
+[-] Trying : http://127.0.0.1/themes/theme_initializr/paquet.xml<br />
+[-] Trying : http://127.0.0.1/themes/theme_ooCSS/plugin.xml<br />
+[-] Trying : http://127.0.0.1/themes/theme_ooCSS/paquet.xml<br />
+[-] Trying : http://127.0.0.1/themes/theme_californiumite/plugin.xml<br />
 
 Vulnerabilities identification
 ========
@@ -82,9 +136,3 @@ Application is located here : http://127.0.0.1/<br />
 [!] Version is : 2.1.12<br />
 [!] Plugin folder is : plugins/<br />
 [!] Potential Vulnerability : (versions : 2.0.21/2.1.16/3.0.3), SPIP connect Parameter PHP Injection, details : http://www.exploit-db.com/exploits/27941/
-
-Themes detection
-========
-$ python spipscan.py --website=http://127.0.0.1 --themes<br />
-Application is located here : http://127.0.0.1/<br />
-[-] We haven't been able to locate the themes folder
