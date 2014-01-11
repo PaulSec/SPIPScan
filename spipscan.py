@@ -28,7 +28,7 @@ def detect_version(header_composed_by):
 
         print "[!] Version is : " + str(major_version) + "." + str(intermediary_version) + "." + str(minor_version)
     except:
-        print "[-] Unable to find the version"
+        display_message("[-] Unable to find the version")
         pass
 
 
@@ -77,7 +77,7 @@ def detect_folder(url, isForPlugins):
             return True
 
         if (req.status_code == 403):
-            print "[-] Access forbidden on folder."
+            display_message("[-] Access forbidden on folder.")
             return True
 
     return False
@@ -107,22 +107,22 @@ def detect_version_of_plugin_or_theme_by_folder_name(url, folder):
     url_folder = url + folder + "plugin.xml"
     # HTTP GET to get the version of the plugin
     req_plugin_xml = requests.get(url_folder, timeout=10)
-    print "[-] Trying : " + url_folder
+    display_message("[-] Trying : " + url_folder)
     if (req_plugin_xml.status_code == 200):
         regex_version_plugin = re.search(
             r"<version>\s*?(\d+(.\d+)?(.\d+)?)\s*?</version>", req_plugin_xml.content, re.S)
         print "[!] Plugin " + folder[:-1] + " detected. Version : " + str(regex_version_plugin.group(1))
-        print "URL : " + url_folder
+        display_message("URL : " + url_folder)
     else:
         url_folder = url + folder + "paquet.xml"
         # HTTP GET to get the version of the plugin
         req_plugin_xml = requests.get(url_folder, timeout=10)
-        print "[-] Trying : " + url_folder
+        display_message("[-] Trying : " + url_folder)
         if (req_plugin_xml.status_code == 200):
             regex_version_plugin = re.search(
                 r"version=\"\s*?(\d+(.\d+)?(.\d+)?)\s*?\"", req_plugin_xml.content, re.S)
             print "[!] Plugin " + folder[:-1] + " detected. Version : " + str(regex_version_plugin.group(1))
-            print "URL : " + url_folder
+            display_message("URL : " + url_folder)
         else:
             pass
 
@@ -204,6 +204,17 @@ def bruteforce_folder(url, filename, isForPlugins):
     for folder in folders:
         detect_version_of_plugin_or_theme_by_folder_name(url, folder)    
 
+# Display function to only print message
+# if verbose mode is ON
+
+
+def display_message(m):
+    global opts
+
+    if (opts.verbose):
+        print m
+
+
 # option parser
 parser = optparse.OptionParser()
 parser.add_option('--website', help='Website to pentest', dest='website')
@@ -214,6 +225,8 @@ parser.add_option('--version', help='Detect version', dest='detect_version', def
 parser.add_option('--vulns', help='Detect possible vulns', dest='detect_vulns', default=False, action='store_true')
 parser.add_option('--bruteforce_plugins_file', help='Bruteforce plugin file (eg. plugins_name.db)', dest='bruteforce_plugins_file', default=None)
 parser.add_option('--bruteforce_themes_file', help='Bruteforce theme file (eg. themes_name.db)', dest='bruteforce_themes_file', default=None)
+parser.add_option('--verbose', help='Verbose mode', dest='verbose', default=False, action='store_true')
+
 
 if (len(sys.argv) <= 2):
     parser.print_help()
@@ -221,7 +234,7 @@ else:
     (opts, args) = parser.parse_args()
 
     url = opts.website + opts.path
-    print "Application is located here : " + url
+    display_message("Application is located here : " + url)
 
     if (opts.detect_version or opts.detect_vulns):
         req = requests.get(url, timeout=10)
@@ -229,11 +242,11 @@ else:
 
     if (opts.detect_plugins or opts.bruteforce_plugins_file is not None):
         if not detect_folder(url, True):
-            print "[-] We haven't been able to locate the plugins folder"
+            display_message("[-] We haven't been able to locate the plugins folder")
 
     if (opts.detect_themes or opts.bruteforce_themes_file is not None):
         if not detect_folder(url, False):
-            print "[-] We haven't been able to locate the themes folder"
+            display_message("[-] We haven't been able to locate the themes folder")
 
     # detect plugin will do brute force attack if it finds a HTTP 403
     # (Restricted)
