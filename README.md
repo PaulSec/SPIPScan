@@ -21,7 +21,7 @@ Options:<br />
   --version             Detect version<br />
   --vulns               Detect possible vulns<br />
   --bruteforce_plugins_file=BRUTEFORCE_PLUGINS_FILE<br />
-                        Bruteforce plugin file (eg. plugins_name.txt)<br />
+                        Bruteforce plugin file (eg. plugins_name.db)<br />
   --bruteforce_themes_file=BRUTEFORCE_THEMES_FILE<br />
                         Bruteforce theme file (eg. themes_name.db)<br />
                         
