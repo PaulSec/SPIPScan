@@ -238,7 +238,10 @@ else:
 
     if (opts.detect_version or opts.detect_vulns):
         req = requests.get(url, timeout=10)
-        detect_version(req.headers['composed-by'])
+        if ('composed-by' in req.headers):
+            detect_version(req.headers['composed-by'])
+        else:
+            print "Are you sure it's an SPIP Install ?"
 
     if (opts.detect_plugins or opts.bruteforce_plugins_file is not None):
         if not detect_folder(url, True):
