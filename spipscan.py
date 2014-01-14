@@ -14,7 +14,38 @@ folder_themes = None
 # Version is in the header (for almost all versions)
 
 
-def detect_version(header_composed_by):
+def detect_version(req):
+    if ('composed-by' in req.headers):
+        res = detect_version_with_header(req.headers['composed-by'])
+        if (res):
+            return
+        else:
+            res = detect_version_in_html(req.content)
+            if (res):
+                return
+            else:
+                print "Are you sure it's an SPIP Install ?"
+                raise Exception('Are you sure it is an SPIP install ?')
+            
+
+def detect_version_in_html(content):
+    global major_version
+    global intermediary_version
+    global minor_version
+
+    regex_version_spip = re.search(r"generator\" content=\"SPIP ((\d+).?(\d+)?.?(\d+)?)", content)
+    try:
+        major_version = regex_version_spip.group(2)
+        intermediary_version = regex_version_spip.group(3)
+        minor_version = regex_version_spip.group(4)
+
+        print "[!] Version (in HTML) is : " + str(major_version) + "." + str(intermediary_version) + "." + str(minor_version)
+        return True
+    except:
+        display_message("[-] Unable to find the version in the HTML")
+        return False
+
+def detect_version_with_header(header_composed_by):
     global major_version
     global intermediary_version
     global minor_version
@@ -26,10 +57,11 @@ def detect_version(header_composed_by):
         intermediary_version = regex_version_spip.group(2)
         minor_version = regex_version_spip.group(3)
 
-        print "[!] Version is : " + str(major_version) + "." + str(intermediary_version) + "." + str(minor_version)
+        print "[!] Version (in Headers) is : " + str(major_version) + "." + str(intermediary_version) + "." + str(minor_version)
+        return True
     except:
-        display_message("[-] Unable to find the version")
-        pass
+        display_message("[-] Unable to find the version in the headers")
+        return False
 
 
 # Detect the plugins/themes folder of a SPIP install
@@ -238,10 +270,7 @@ else:
 
     if (opts.detect_version or opts.detect_vulns):
         req = requests.get(url, timeout=10)
-        if ('composed-by' in req.headers):
-            detect_version(req.headers['composed-by'])
-        else:
-            print "Are you sure it's an SPIP Install ?"
+        detect_version(req)
 
     if (opts.detect_plugins or opts.bruteforce_plugins_file is not None):
         if not detect_folder(url, True):
