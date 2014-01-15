@@ -114,6 +114,23 @@ def detect_folder(url, isForPlugins):
 
     return False
 
+def detect_sensitive_folders(url):
+    folders = ['IMG/', 'prive/', 'local/', 'config/', 'local/']
+
+    for folder in folders:
+        url_to_visit = url + folder
+        req = requests.get(url_to_visit, timeout=10)
+
+        # code only for 200 (might be directory listing)
+        if (req.status_code == 200):
+            if ("Index of" in req.content):
+                print "[!] Directory listing on folder : " + folder
+            else:
+                display_message("[-] Folder " + folder + " might be interesting")
+        elif (req.status_code == 403):
+            print "[-] Access forbidden on folder " + folder + "."
+
+
 # Function to iterate on results if there's a directory listing
 # will then (try to) detect the version of the plugin/theme
 
@@ -253,6 +270,7 @@ parser.add_option('--website', help='Website to pentest', dest='website')
 parser.add_option('--path', help='Path for webapp (default : "/")', dest='path', default='/')
 parser.add_option('--plugins', help='Detect plugins installed', dest='detect_plugins', default=False, action='store_true')
 parser.add_option('--themes', help='Detect themes installed', dest='detect_themes', default=False, action='store_true')
+parser.add_option('--sensitive_folders', help='Detect sensitive folders', dest='detect_sensitive_folders', default=False, action='store_true')
 parser.add_option('--version', help='Detect version', dest='detect_version', default=False, action='store_true')
 parser.add_option('--vulns', help='Detect possible vulns', dest='detect_vulns', default=False, action='store_true')
 parser.add_option('--bruteforce_plugins_file', help='Bruteforce plugin file (eg. plugins_name.db)', dest='bruteforce_plugins_file', default=None)
@@ -289,6 +307,9 @@ else:
     # brute force themes folder if 403 also
     if (opts.bruteforce_themes_file is not None and folder_themes is not None):
         bruteforce_folder(url, opts.bruteforce_themes_file, False)
+
+    if (opts.detect_sensitive_folders):
+        detect_sensitive_folders(url)
 
     if (opts.detect_vulns):
         detect_vulnerabilities()
