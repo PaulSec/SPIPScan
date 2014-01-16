@@ -69,7 +69,7 @@ def detect_version_with_header(header_composed_by):
 # And it does not do bruteforce attack on the retrieved elements.
 
 
-def detect_folder(url, isForPlugins):
+def detect_folder_for_themes_and_plugins(url, isForPlugins):
     global folder_themes
     global folder_plugins
     global opts
@@ -291,11 +291,11 @@ else:
         detect_version(req)
 
     if (opts.detect_plugins or opts.bruteforce_plugins_file is not None):
-        if not detect_folder(url, True):
+        if not detect_folder_for_themes_and_plugins(url, True):
             print "[-] We haven't been able to locate the plugins folder"
 
     if (opts.detect_themes or opts.bruteforce_themes_file is not None):
-        if not detect_folder(url, False):
+        if not detect_folder_for_themes_and_plugins(url, False):
             print "[-] We haven't been able to locate the themes folder"
 
     # detect plugin will do brute force attack if it finds a HTTP 403
