@@ -18,6 +18,8 @@ Options:<br />
   --website=WEBSITE     Website to pentest<br />
   --path=PATH           Path for webapp (default : "/")<br />
   --plugins             Detect plugins installed<br />
+  --themes              Detect themes installed<br />
+  --sensitive_folders   Detect sensitive folders<br />
   --version             Detect version<br />
   --vulns               Detect possible vulns<br />
   --bruteforce_plugins_file=BRUTEFORCE_PLUGINS_FILE<br />
@@ -135,4 +137,15 @@ $ python spipscan.py --website=http://127.0.0.1 --vulns<br />
 Application is located here : http://127.0.0.1/<br />
 [!] Version is : 2.1.12<br />
 [!] Plugin folder is : plugins/<br />
-[!] Potential Vulnerability : (versions : 2.0.21/2.1.16/3.0.3), SPIP connect Parameter PHP Injection, details : http://www.exploit-db.com/exploits/27941/
+[!] Potential Vulnerability : (versions : 2.0.21/2.1.16/3.0.3), SPIP connect Parameter PHP Injection, details : http://www.exploit-db.com/exploits/27941/<br />
+
+
+Sensitive folder identification
+========
+$ python spipscan.py --website=http://127.0.0.1 --sensitive_folders --verbose<br />
+Application is located here : http://127.0.0.1/<br />
+[!] Directory listing on folder : IMG/<br />
+[!] Directory listing on folder : prive/<br />
+[!] Directory listing on folder : local/<br />
+[!] Directory listing on folder : config/<br />
+[!] Directory listing on folder : local/<br />
