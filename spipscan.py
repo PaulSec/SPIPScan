@@ -114,6 +114,9 @@ def detect_folder_for_themes_and_plugins(url, isForPlugins):
 
     return False
 
+# Detect sensitive folders/files for the specified SPIP install
+# Will check the status code and define if the resource might be available or not 
+
 def detect_sensitive_folders(url):
     folders = ['IMG/', 'prive/', 'local/', 'config/', 'local/', 'config/ecran_securite.php']
 
