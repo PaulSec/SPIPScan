@@ -115,7 +115,7 @@ def detect_folder(url, isForPlugins):
     return False
 
 def detect_sensitive_folders(url):
-    folders = ['IMG/', 'prive/', 'local/', 'config/', 'local/']
+    folders = ['IMG/', 'prive/', 'local/', 'config/', 'local/', 'config/ecran_securite.php']
 
     for folder in folders:
         url_to_visit = url + folder
@@ -126,9 +126,9 @@ def detect_sensitive_folders(url):
             if ("Index of" in req.content):
                 print "[!] Directory listing on folder : " + folder
             else:
-                display_message("[-] Folder " + folder + " might be interesting")
+                display_message("[-] Folder/File " + folder + " might be interesting")
         elif (req.status_code == 403):
-            print "[-] Access forbidden on folder " + folder + "."
+            print "[-] Access forbidden on folder/file " + folder + "."
 
 
 # Function to iterate on results if there's a directory listing
