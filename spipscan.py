@@ -221,7 +221,7 @@ def detect_vulnerabilities():
 
                 if ((i == 2) and (int(tmp[i]) >= int(minor_version))):
                     print "[!] Potential Vulnerability : (versions : " + versions_vuln + "), " + description_vuln + ", details : " + url_vuln
-                i =               i = i+ 1
+                i = i+ 1
 
 # This function allows you to do brute force to search for folders
 # This function is used to bruteforce Plugin/Theme names 
