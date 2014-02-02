@@ -256,6 +256,81 @@ def bruteforce_folder(url, filename, isForPlugins):
     for folder in folders:
         detect_version_of_plugin_or_theme_by_folder_name(url, folder)    
 
+
+# enumerate users
+def enumerate_users(url, file_logins):
+
+    logins = []
+    with open(file_logins) as f:
+        logins = f.readlines()
+
+    # removing new line
+    logins = [remove_new_line_from_name(name) for name in logins]
+
+    url_login = url + 'spip.php?page=login'
+    display_message("Accessing " + url_login)
+    req = requests.get(url_login)
+
+    soup = BeautifulSoup(req.content)
+    inputTag = soup.findAll(attrs={"name": "formulaire_action_args"})
+    valueTag = inputTag[0]['value']
+    display_message("Form action args grabbed : " + valueTag)
+
+    # craft the POST request
+    req_login = {}
+    req_login['page'] = 'login'
+    req_login['formulaire_action'] = 'login'
+    req_login['formulaire_action_args'] = valueTag
+    req_login['session_password_md5'] = ''
+    req_login['next_session_password_md5'] = ''
+    req_login['password'] = 'spipscan'
+
+    for login in logins:
+        req = req_login.copy()
+        req['var_login'] = login
+        req = requests.post(url_login, data=req)
+        if (contains_unknown_login(req.content)):
+            display_message("[-] Tried login : " + login)
+        else:
+            print "[!] Login found : " + login
+
+
+# Function to check if the response contains
+# a message saying that the login exists or not
+
+def contains_unknown_login(response):
+
+    # Feel free to add more if it's not already in it
+    unknown_message = ['je nepoznat',
+                        'desconegut',
+                        'pa konu',
+                        'li se pa rokoni',
+                        'je nezn&aacute;m&aacute;',
+                        'kendes ikke.',
+                        'unbekannt',
+                        'is unknown',
+                        'estas nekonata',
+                        'es desconocido',
+                        'identifikatzailea ezezaguna da',
+                        'Ny&iacute;k&#596;&#770; &aacute;',
+                        'est inconnu',
+                        '&eacute; desco&ntilde;ecido',
+                        'azonos&iacute;t&oacute; ismeretlen',
+                        'tidak dikenal',
+                        'risulta inesistente',
+                        'risulta inesistente',
+                        'is niet bekend',
+                        'z-es inconegut',
+                        'inconegut',
+                        'es desconoissut',
+                        'desconhecido']
+    for message in unknown_message:
+        if (message in response):
+            return True
+
+    return False
+
+
 # Display function to only print message
 # if verbose mode is ON
 
@@ -273,11 +348,13 @@ parser.add_option('--website', help='Website to pentest', dest='website')
 parser.add_option('--path', help='Path for webapp (default : "/")', dest='path', default='/')
 parser.add_option('--plugins', help='Detect plugins installed', dest='detect_plugins', default=False, action='store_true')
 parser.add_option('--themes', help='Detect themes installed', dest='detect_themes', default=False, action='store_true')
+parser.add_option('--users', help='Bruteforce user logins', dest='bruteforce_user_logins', default=False, action='store_true')
 parser.add_option('--sensitive_folders', help='Detect sensitive folders', dest='detect_sensitive_folders', default=False, action='store_true')
 parser.add_option('--version', help='Detect version', dest='detect_version', default=False, action='store_true')
 parser.add_option('--vulns', help='Detect possible vulns', dest='detect_vulns', default=False, action='store_true')
 parser.add_option('--bruteforce_plugins_file', help='Bruteforce plugin file (eg. plugins_name.db)', dest='bruteforce_plugins_file', default=None)
 parser.add_option('--bruteforce_themes_file', help='Bruteforce theme file (eg. themes_name.db)', dest='bruteforce_themes_file', default=None)
+parser.add_option('--bruteforce_logins_file', help='Bruteforce login file (eg. user_logins.db)', dest='bruteforce_logins_file', default=None)
 parser.add_option('--verbose', help='Verbose mode', dest='verbose', default=False, action='store_true')
 
 
@@ -289,7 +366,7 @@ else:
     url = opts.website + opts.path
     display_message("Application is located here : " + url)
 
-    if (opts.detect_version or opts.detect_vulns):
+    if (opts.detect_version or opts.detect_vulns or opts.bruteforce_user_logins):
         req = requests.get(url, timeout=10)
         detect_version(req)
 
@@ -303,13 +380,19 @@ else:
 
     # detect plugin will do brute force attack if it finds a HTTP 403
     # (Restricted)
-    # opts.detect_plugins is False and 
     if (opts.bruteforce_plugins_file is not None and folder_plugins is not None):
         bruteforce_folder(url, opts.bruteforce_plugins_file, True)
 
     # brute force themes folder if 403 also
     if (opts.bruteforce_themes_file is not None and folder_themes is not None):
         bruteforce_folder(url, opts.bruteforce_themes_file, False)
+
+    if (opts.bruteforce_user_logins and opts.bruteforce_logins_file is not None):
+        if (major_version == "2" and intermediary_version == "0"):
+            enumerate_users(url, opts.bruteforce_logins_file)
+        else:
+            print "This feature is only available for versions 2.0.X"
+        
 
     if (opts.detect_sensitive_folders):
         detect_sensitive_folders(url)
