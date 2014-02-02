@@ -20,6 +20,7 @@ Options:
   --path=PATH           Path for webapp (default : "/")
   --plugins             Detect plugins installed
   --themes              Detect themes installed
+  --users               Bruteforce user logins
   --sensitive_folders   Detect sensitive folders
   --version             Detect version
   --vulns               Detect possible vulns
@@ -27,6 +28,8 @@ Options:
                         Bruteforce plugin file (eg. plugins_name.db)
   --bruteforce_themes_file=BRUTEFORCE_THEMES_FILE
                         Bruteforce theme file (eg. themes_name.db)
+  --bruteforce_logins_file=BRUTEFORCE_LOGINS_FILE
+                        Bruteforce login file (eg. user_logins.db)
   --verbose             Verbose mode
 ```
 
@@ -191,4 +194,24 @@ Application is located here : http://127.0.0.1/
 [!] Directory listing on folder : local/
 [!] Directory listing on folder : config/
 [!] Directory listing on folder : local/
+```
+
+Bruteforce login on SPIP (v. 2.0.X)
+========
+```python
+$ python spipscan.py --website=http://127.0.0.1 --path=/spip/ --users --bruteforce_logins_file=user_logins.db --verbose
+```
+
+Result : <br />
+```python
+Application is located here : http://127.0.0.1/spip/
+[!] Version (in Headers) is : 2.0.24
+Accessing http://127.0.0.1/spip/spip.php?page=login
+Form action args grabbed : 22S1TEIR6Ic7X9s41uTT+P8ntpRsNhjruYi5UZ5P8VMJ5VjfgqFrBeoa5+xz/roi9UtxAqw+j7bSTZiHHwjtj/kkOnzorNLXOneOGWXYIgNJI3uZdvq374q8NtT5nL7n56mO4+rJePWrUAhEXw==
+[!] Login found : admin
+[-] Tried login : administrator
+[-] Tried login : test
+[-] Tried login : guest
+[-] Tried login : root
+[-] Tried login : backup
 ```
