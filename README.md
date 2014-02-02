@@ -129,7 +129,7 @@ Application is located here : http://127.0.0.1/
 Themes bruteforce
 ========
 ```python
-$ python spipscan.py --website=http://127.0.0.1/ --bruteforce_themes=themes_name.db
+$ python spipscan.py --website=http://127.0.0.1 --bruteforce_themes=themes_name.db
 ```
 
 Result : <br />
