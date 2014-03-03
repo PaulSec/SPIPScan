@@ -10,6 +10,8 @@ minor_version = 0
 folder_plugins = None
 folder_themes = None
 
+plugins = {}
+
 # Detect the version of a SPIP install
 # Version is in the header (for almost all versions)
 
@@ -64,6 +66,25 @@ def detect_version_with_header(header_composed_by):
         return False
 
 
+def detect_plugins_in_header(req):
+    regex_plugins = re.search(r"\+\s([\w(\.),]+)", req.headers['composed-by'])
+    try:
+        plugins = regex_plugins.group(1).split(',')
+        for plugin in plugins:
+            plugin_name = plugin.split('(')[0]
+            plugin_version = plugin.split('(')[1][:-1]
+            insert_discovered_plugin(plugin_name, plugin_version)
+    except:
+        display_message("[-] We haven't been able to get plugins in Header")
+
+
+def insert_discovered_plugin(plugin_name, plugin_version):
+    global plugins
+
+    if (plugin_name not in plugins):
+        plugins[plugin_name] = plugin_version
+        print "[!] Plugin " + plugin_name + " detected. Version : " + plugin_version
+
 # Detect the plugins/themes folder of a SPIP install
 # Moreover, if there's directory listing enabled, it recovers the plugins/themes
 # And it does not do bruteforce attack on the retrieved elements.
@@ -81,8 +102,10 @@ def detect_folder_for_themes_and_plugins(url, isForPlugins):
 
     if (isForPlugins):
         folders = plugins_folders
+        display_message('[-] Trying to detect folder for plugins')
     else:
         folders = themes_folders
+        display_message('[-] Trying to detect folder for themes')
 
 
     for folder in folders:
@@ -173,7 +196,8 @@ def detect_version_of_plugin_or_theme_by_folder_name(url, folder):
         if (req_plugin_xml.status_code == 200):
             regex_version_plugin = re.search(
                 r"version=\"\s*?(\d+(.\d+)?(.\d+)?)\s*?\"", req_plugin_xml.content, re.S)
-            print "[!] Plugin " + folder[:-1] + " detected. Version : " + str(regex_version_plugin.group(1))
+            insert_discovered_plugin(folder[:-1], str(regex_version_plugin.group(1)))
+            # print "[!] Plugin " + folder[:-1] + " detected. Version : " + 
             display_message("URL : " + url_folder)
         else:
             pass
@@ -366,11 +390,13 @@ else:
     url = opts.website + opts.path
     display_message("Application is located here : " + url)
 
-    if (opts.detect_version or opts.detect_vulns or opts.bruteforce_user_logins):
+    if (opts.detect_version or opts.detect_vulns or opts.bruteforce_user_logins or opts.detect_plugins):
         req = requests.get(url, timeout=10)
         detect_version(req)
 
     if (opts.detect_plugins or opts.bruteforce_plugins_file is not None):
+        display_message("[-] Trying to detect plugins in Header")
+        detect_plugins_in_header(req)        
         if not detect_folder_for_themes_and_plugins(url, True):
             print "[-] We haven't been able to locate the plugins folder"
 
