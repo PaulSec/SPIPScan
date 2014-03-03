@@ -197,7 +197,6 @@ def detect_version_of_plugin_or_theme_by_folder_name(url, folder):
             regex_version_plugin = re.search(
                 r"version=\"\s*?(\d+(.\d+)?(.\d+)?)\s*?\"", req_plugin_xml.content, re.S)
             insert_discovered_plugin(folder[:-1], str(regex_version_plugin.group(1)))
-            # print "[!] Plugin " + folder[:-1] + " detected. Version : " + 
             display_message("URL : " + url_folder)
         else:
             pass
