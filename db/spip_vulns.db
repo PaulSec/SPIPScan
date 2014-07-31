@@ -8,3 +8,4 @@
 2.0.23/2.1.22/3.0.9;;Bypass backoffice authentication;;http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2013-2118
 2.0.24/2.1.25/3.0.14;;Possible XSS injection on author's name;;http://blog.spip.net/Bonne-annee-3014.html
 2.0.24/2.1.25/3.0.14;;Possible JavaScript injection on author's website;;http://blog.spip.net/Bonne-annee-3014.html
+2.0.23/2.1.22/3.0.9;;Privilege escalation to administrator account from non authenticated user;;http://www.exploit-db.com/exploits/33425/
