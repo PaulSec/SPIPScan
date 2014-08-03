@@ -26,9 +26,7 @@ def detect_version(req):
             if (res):
                 return
             else:
-                print "Are you sure it's an SPIP Install ?"
                 raise Exception('Are you sure it is an SPIP install ?')
-            
 
 def detect_version_in_html(content):
     global major_version
@@ -169,7 +167,6 @@ def iterate_directory_listing(url, content):
         try:
             regex_plugin = re.search(r"href=\"(\w+/)\">\s?(\w+)/<", str(link))
             folder_plugin = regex_plugin.group(1)
-            name_plugin = regex_plugin.group(2)
             detect_version_of_plugin_or_theme_by_folder_name(url, folder_plugin)
         except:
             pass
@@ -216,7 +213,7 @@ def detect_vulnerabilities():
     global minor_version
 
     vulns = []
-    with open('spip_vulns.db') as f:
+    with open('./db/spip_vulns.db') as f:
         vulns = f.readlines()
 
     # removing new line
