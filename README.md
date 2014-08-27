@@ -6,6 +6,18 @@ SPIP (CMS) Scanner for penetration testing purpose written in Python, and releas
 This tool has been designed to perform detection of SPIP installs during penetration testing. 
 Currently, the tool detects the version of the SPIP install and tries to detect if the platform uses some of the top 30 plugins (listed on their website)
 
+Prerequisites
+========
+These packages need to be installed in order to use SPIPScan:
+
+ * Python
+ * Beautiful Soup 4
+
+Example on Ubuntu:
+
+```bash
+$ sudo apt-get install python python-bs4
+```
 
 Usage
 ========
