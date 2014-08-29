@@ -7,30 +7,50 @@ This tool has been designed to perform detection of SPIP installs during penetra
 Currently, the tool detects the version of the SPIP install and tries to detect if the platform uses some of the top 30 plugins (listed on their website)
 
 
+
+Prerequisites
+========
+These packages need to be installed in order to use SPIPScan:
+
+ * Python
+ * Beautiful Soup 4
+
+Example on Ubuntu:
+
+```bash
+$ sudo apt-get install python python-bs4 python3-bs4
+```
+
+
+
 Usage
 ========
 
 ```python
 $ python spipscan.py 
-Usage: spipscan.py [options]
+Usage: spipscan [options]
 
 Options:
   -h, --help            show this help message and exit
-  --website=WEBSITE     Website to pentest
-  --path=PATH           Path for webapp (default : "/")
-  --plugins             Detect plugins installed
-  --themes              Detect themes installed
-  --users               Bruteforce user logins
-  --sensitive_folders   Detect sensitive folders
-  --version             Detect version
-  --vulns               Detect possible vulns
-  --bruteforce_plugins_file=BRUTEFORCE_PLUGINS_FILE
-                        Bruteforce plugin file (eg. plugins_name.db)
-  --bruteforce_themes_file=BRUTEFORCE_THEMES_FILE
+  -w WEBSITE, --website=WEBSITE
+                        Website to pentest (default: "http://localhost")
+  -d PATH, --path=PATH  Path for webapp (default: "/")
+  -t, --themes          Detect themes installed
+  -p, --plugins         Detect plugins installed
+  -s, --vulns           Detect possible vulns
+  -V, --version         Detect version
+  -f, --sensitive_folders
+                        Detect sensitive folders
+  -u, --users           Bruteforce user logins
+  -T BRUTEFORCE_THEMES_FILE, --bruteforce_themes_file=BRUTEFORCE_THEMES_FILE
                         Bruteforce theme file (eg. themes_name.db)
-  --bruteforce_logins_file=BRUTEFORCE_LOGINS_FILE
+  -P BRUTEFORCE_PLUGINS_FILE, --bruteforce_plugins_file=BRUTEFORCE_PLUGINS_FILE
+                        Bruteforce plugin file (eg. plugins_name.db)
+  -U BRUTEFORCE_LOGINS_FILE, --bruteforce_logins_file=BRUTEFORCE_LOGINS_FILE
                         Bruteforce login file (eg. user_logins.db)
-  --verbose             Verbose mode
+  -S, --scan            Like -Vtps
+  -F, --force           Force the scan if SPIP version is not detected
+  -v, --verbose         Verbose mode
 ```
 
                         
@@ -93,6 +113,7 @@ $ python spipscan.py --website=http://website.com --plugins --bruteforce_plugins
 ```
 
 
+
 Plugins bruteforce
 ========
 ```python
@@ -116,6 +137,8 @@ Application is located here : http://127.0.0.1/
 [-] Trying : http://127.0.0.1/plugins/saisies/paquet.xml
 ```
 
+
+
 Themes detection
 ========
 ```python
@@ -127,6 +150,7 @@ Result : <br />
 Application is located here : http://127.0.0.1/
 [-] We haven't been able to locate the themes folder
 ```
+
 
 
 Themes bruteforce
@@ -165,6 +189,8 @@ Application is located here : http://127.0.0.1/
 [-] Trying : http://127.0.0.1/themes/theme_californiumite/plugin.xml
 ```
 
+
+
 Vulnerabilities identification
 ========
 ```python
@@ -178,6 +204,7 @@ Application is located here : http://127.0.0.1/
 [!] Plugin folder is : plugins/
 [!] Potential Vulnerability : (versions : 2.0.21/2.1.16/3.0.3), SPIP connect Parameter PHP Injection, details : http://www.exploit-db.com/exploits/27941/
 ```
+
 
 
 Sensitive folder identification
@@ -195,6 +222,8 @@ Application is located here : http://127.0.0.1/
 [!] Directory listing on folder : config/
 [!] Directory listing on folder : local/
 ```
+
+
 
 Bruteforce login on SPIP (v. 2.0.X)
 ========
